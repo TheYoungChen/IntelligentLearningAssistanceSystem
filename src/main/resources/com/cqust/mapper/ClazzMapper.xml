@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cqust.mapper.ClazzMapper">
+    <!--添加班级信息-->
+    <insert id="insert">
+        insert into clazz (name, room, begin_date, end_date, master_id, subject, create_time, update_time)
+        values (#{name}, #{room}, #{beginDate}, #{endDate}, #{masterId}, #{subject}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!--修改班级信息-->
+    <update id="updateClazz">
+        update clazz
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="room != null and room != ''">room = #{room},</if>
+            <if test="beginDate != null">begin_date = #{beginDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="masterId != null">master_id = #{masterId},</if>
+            <if test="subject != null">subject = #{subject},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!--根据ID删除班级信息-->
+    <delete id="DeleteById">
+        delete from clazz where id = #{id}
+    </delete>
+
+    <!--查询全部班级信息-->
+    <select id="list" resultType="com.cqust.pojo.Clazz">
+        select
+        c.id,
+        c.name,
+        c.room,
+        c.begin_date,
+        c.end_date,
+        c.master_id,
+        c.create_time,
+        c.update_time,
+        e.name as master_name,
+        case
+        when CURRENT_DATE &gt; c.end_date then '已结课'
+        when CURRENT_DATE &lt; c.begin_date then '未开班'
+        else '在读中'
+        end as status
+        from clazz c
+        left join emp e on c.master_id = e.id
+        <where>
+            <if test="name != null and name != ''">
+                and c.name like concat('%', #{name}, '%')
+            </if>
+            <if test="begin != null and end != null">
+                and c.end_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by c.update_time desc
+    </select>
+
+    <!--根据ID查询班级信息-->
+    <select id="getClazzById" resultType="com.cqust.pojo.Clazz">
+        select
+            c.id,
+            c.name,
+            c.room,
+            c.begin_date,
+            c.end_date,
+            c.master_id,
+            c.subject,
+            c.create_time,
+            c.update_time
+        from clazz c where c.id = #{id}
+    </select>
+
+    <!--获取全部班级信息-->
+    <select id="getClazzList" resultType="com.cqust.pojo.Clazz">
+        select
+        c.id,
+        c.name,
+        c.room,
+        c.begin_date,
+        c.end_date,
+        c.master_id,
+        c.subject,
+        c.create_time,
+        c.update_time,
+        e.name as master_name,
+        case
+        when CURRENT_DATE &gt; c.end_date then '已结课'
+        when CURRENT_DATE &lt; c.begin_date then '未开班'
+        else '在读中'
+        end as status
+        from clazz c
+        left join emp e on c.master_id = e.id
+        order by c.update_time desc
+    </select>
+
+</mapper>

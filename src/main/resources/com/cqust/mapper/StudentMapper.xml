@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cqust.mapper.StudentMapper">
+    <!--添加学生-->
+    <insert id="insert">
+        insert into student (name, no, gender, phone, degree, clazz_id, id_card, is_college, address, graduation_date)
+        values (#{name}, #{no}, #{gender}, #{phone}, #{degree}, #{clazzId}, #{idCard}, #{isCollege}, #{address}, #{graduationDate})
+    </insert>
+
+    <!--修改学生信息-->
+    <update id="updateStudent">
+        update student
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="no != null and no != ''">no = #{no},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="degree != null">degree = #{degree},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="isCollege != null">is_college = #{isCollege},</if>
+            <if test="address != null and address != ''">address = #{address},</if>
+            <if test="graduationDate != null">graduation_date = #{graduationDate},</if>
+            <if test="violationCount != null and violationCount != ''">violation_count = #{violationCount},</if>
+            <if test="violationScore != null and violationScore != ''">violation_score = #{violationScore},</if>
+            <if test="clazzId != null">clazz_id = #{clazzId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+            where id = #{id}
+    </update>
+
+    <!--添加违规记录-->
+    <update id="violationRecord">
+        update student set
+        violation_count = violation_count + 1,
+        violation_score = violation_score + #{score}
+        where id = #{id}
+    </update>
+
+    <!--根据ID批量删除员工信息-->
+    <delete id="deleteByIds">
+        delete from student where id in
+            <foreach collection="ids" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </delete>
+
+    <!--分页查询所有学生信息-->
+    <select id="list" resultType="com.cqust.pojo.Student">
+        select
+        s.id,
+        s.name,
+        s.no,
+        s.gender,
+        s.phone,
+        s.id_card,
+        s.is_college,
+        s.address,
+        s.degree,
+        s.graduation_date,
+        s.violation_count,
+        s.violation_score,
+        s.clazz_id,
+        s.create_time,
+        s.update_time,
+        c.name as clazz_name
+        from student s
+        left join clazz c on s.clazz_id = c.id
+        <where>
+            1 = 1
+            <if test="name != null and name != ''">
+                and s.name like concat('%', #{name}, '%')
+            </if>
+            <if test="degree != null">
+                and s.degree &lt;= #{degree}
+            </if>
+            <if test="clazzId != null">
+                and s.clazz_id = #{clazzId}
+            </if>
+        </where>
+    </select>
+
+    <!--根据ID查询学生信息-->
+    <select id="getStudentById" resultType="com.cqust.pojo.Student">
+        select s.id,
+        s.name,
+        s.no,
+        s.phone,
+        s.gender,
+        s.degree,
+        s.id_card,
+        s.is_college,
+        s.address,
+        s.graduation_date,
+        s.violation_count,
+        s.violation_score,
+        s.clazz_id,
+        s.create_time,
+        s.update_time
+        from student s
+        where s.id = #{id}
+    </select>
+
+    <!--统计学生学历-->
+    <select id="countStudentDegreeData" resultType="java.util.Map">
+        select
+            (case
+                when degree = 1 then '初中'
+                when degree = 2 then '高中'
+                when degree = 3 then '大专'
+                when degree = 4 then '本科'
+                when degree = 5 then '硕士'
+                when degree = 6 then '博士'
+                else '未知' end) name,
+            count(*) value
+        from student group by degree
+    </select>
+
+    <!--统计各班级人数-->
+    <select id="countStudentClassData" resultType="java.util.Map">
+        select
+            c.name clazzs,
+            count(*) num
+        from student s
+        left join clazz c on s.clazz_id = c.id
+        group by s.clazz_id order by num
+    </select>
+
+</mapper>

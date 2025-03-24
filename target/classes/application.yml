@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: Tilas-Web-Management
+
+  # 数据库的连接信息
+  datasource:
+    url: jdbc:mysql://localhost:3306/tlias
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: yc0416...
+  servlet:
+    multipart:
+      # 最大单个文件大小
+      max-file-size: 10MB
+      # 最大请求大小（包括所有文件和数据）
+      max-request-size: 100MB
+
+# Mybatis的相关配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 驼峰命名映射开关
+    map-underscore-to-camel-case: true
+
+# 阿里云OSS的配置
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    bucketName: java-ai-sasuke
+    region: cn-beijing
